@@ -1,6 +1,6 @@
 id: CheckHtmlTextTransform
 name: CheckHtmlTextTransform
-version: 1.0.1
+version: 1.0.2
 
 description: <__trans phrase="This plugin enables you to check html_text_transform compatibility.">
 author_name: Taku Amano
@@ -12,7 +12,7 @@ l10n_lexicon:
     This plugin enables you to check html_text_transform compatibility.: "html_text_transform の互換性を確認することができます。"
     Check: "チェックする"
     System administor permission is required.: "システム管理者権限が必要です"
-    r4606/6.5 or earlier, or UseTraditionalTransformer: r4606/6.5以前、もしくはUseTraditionalTransformer
+    "r4606/6.5 or earlier, or UseTraditionalTransformer": r4606/6.5以前、もしくはUseTraditionalTransformer
 
 config_template: checkhtmltexttransform_system_config.tmpl
 
