@@ -6,17 +6,21 @@ This is a plugin for the Movable Type.
 
 ![Screenshot](https://raw.githubusercontent.com/usualoma/mt-plugin-CheckHtmlTextTransform/master/artwork/screenshot.png)
 
-## Installation
+## Installation and execution
 
 1. Download an archive file from [releases](https://github.com/usualoma/mt-plugin-CheckHtmlTextTransform/releases).
 1. Unpack an archive file.
 1. Upload unpacked files to your MT directory.
+1. Click "Check" link.
 
 Should look like this when installed:
 
     $MT_HOME/
         plugins/
             CheckHtmlTextTransform/
+
+![System config](https://raw.githubusercontent.com/usualoma/mt-plugin-CheckHtmlTextTransform/master/artwork/system_config.jpg)
+
 
 ## Requirements
 
