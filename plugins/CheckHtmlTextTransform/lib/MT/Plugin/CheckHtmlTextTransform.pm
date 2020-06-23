@@ -149,6 +149,14 @@ sub html_text_transform_r4610 {
     $str;
 }
 
+sub _cb_fields {
+    my $ct = shift;
+    [grep {
+        $_->{type} eq 'multi_line_text'
+            && $_->{options}{input_format} eq '__default__'
+    } @{ $ct->fields }];
+}
+
 sub checkhtmltexttransform {
     my $app = shift;
     $app->user->is_superuser
@@ -161,9 +169,28 @@ sub checkhtmltexttransform {
         { fetchonly => [ 'blog_id', 'id' ] }
     );
 
+    my @cds = ();
+
+    my $ct_model = eval { $app->model('content_type') };
+    if ($ct_model) {
+        my $ct_iter = $ct_model->load_iter;
+        while (my $ct = $ct_iter->()) {
+            next unless scalar @{ _cb_fields($ct) };
+            push @cds, map { +{
+                id => $_->id,
+                blog_id => $_->blog_id,
+                content_type_id => $ct->id,
+                } } $app->model('content_data')->load(
+                    { content_type_id => $ct->id },
+                    { fetchonly => [ 'blog_id', 'id' ] }
+                );
+        }
+    }
+
     $tmpl->param(
         {
             entries => \@entries,
+            cds => \@cds,
         }
     );
 
@@ -182,6 +209,49 @@ sub checkhtmltexttransform_transform {
 
     my $entry = $app->model('entry')->load($id);
     my $src = $entry->text . "\n" . $entry->text_more;
+
+    my @list = map {
+        my $m = "html_text_transform_$_";
+        no strict "refs";
+        &$m($src);
+    } split /,/, $formats;
+
+    $app->set_header( 'X-Content-Type-Options' => 'nosniff' );
+    $app->send_http_header("application/json");
+    $app->{no_print_body} = 1;
+    $app->print_encode(MT::Util::to_json( +{ entries => [ \@list ] } ));
+
+    return undef;
+}
+
+sub checkhtmltexttransform_transform_cd {
+    my $app = shift;
+    $app->user->is_superuser
+        or die plugin()->translate('System administor permission is required.');
+
+    my $id = $app->param('id');
+    my $content_type_id = $app->param('content_type_id');
+    my $formats = $app->param('formats');
+
+    die unless $id =~ m/\A[0-9]+\z/ && $content_type_id =~  m/\A[0-9]+\z/ && $formats =~ m/\A(?:(?:traditional|r[0-9]+),?)+\z/;
+
+    my $ct = $app->model('content_type')->load($content_type_id);
+    my $cd = $app->model('content_data')->load($id);
+    my $fields = _cb_fields($ct);
+    my $field_registry = MT->registry('content_field_types');
+    my $src = join "\n", map {
+        my $field = $_;
+
+        my $handler = $field_registry->{ $field->{type} }{feed_value_handler};
+        if ( $handler && !ref $handler ) {
+            $handler = MT->handler_to_coderef($handler);
+        }
+
+        my $field_values = $cd->data->{ $field->{id} };
+        $handler
+            ? $handler->( MT->app, $field, $field_values )
+            : MT::Util::encode_html($field_values);
+    } @$fields;
 
     my @list = map {
         my $m = "html_text_transform_$_";

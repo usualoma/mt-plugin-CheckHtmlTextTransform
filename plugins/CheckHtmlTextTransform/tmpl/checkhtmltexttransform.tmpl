@@ -37,6 +37,7 @@
 
     <script type="module">
       const entries = <mt:Var name="entries" to_json="1" />;
+      const cds = <mt:Var name="cds" to_json="1" />;
       function renderProgress(current, total) {
         document.querySelector(
           "#progress"
@@ -47,11 +48,13 @@
       }
 
       document.querySelector("#do-check").addEventListener("click", () => {
+        const allData = entries.concat(cds);
+
         document.querySelector("#result").innerHTML = "";
-        renderProgress(0, entries.length);
+        renderProgress(0, allData.length);
 
         let promise = Promise.resolve();
-        entries.forEach((e, i) => {
+        allData.forEach((e, i) => {
           const formats = [
             document.querySelector("#left").value,
             document.querySelector("#right").value,
@@ -60,21 +63,27 @@
 
           promise = promise.then(async () => {
             const res = await fetch(
-              `<mt:CGIPath><mt:AdminScript>?__mode=checkhtmltexttransform_transform&id=${
-                e.id
-              }&formats=${formats.join(",")}`
+              `<mt:CGIPath><mt:AdminScript>?__mode=checkhtmltexttransform_transform${
+                e.content_type_id ? "_cd" : ""
+              }${
+                e.content_type_id ? `&content_type_id=${e.content_type_id}` : ""
+              }&id=${e.id}&formats=${formats.join(",")}`
             );
             const data = await res.json();
             list = data.entries[0];
           });
 
           promise = promise.then(() => {
-            renderProgress(i + 1, entries.length);
+            renderProgress(i + 1, allData.length);
             if (list.every((d) => d === list[0])) {
               return;
             }
 
-            const name = `<mt:CGIPath><mt:AdminScript>?__mode=view&_type=entry&blog_id=${e.blog_id}&id=${e.id}`;
+            const name = `<mt:CGIPath><mt:AdminScript>?__mode=view&_type=${
+              e.content_type_id ? "content_data" : "entry"
+            }${
+              e.content_type_id ? `&content_type_id=${e.content_type_id}` : ""
+            }&blog_id=${e.blog_id}&id=${e.id}`;
             const maxLines = Reflect.apply(
               Math.max,
               null,
@@ -114,7 +123,10 @@
       <div class="row mt-3">
         <div class="col-6">
           <select id="left" class="form-control">
-            <option value="traditional"><__trans phrase="r4606/6.5 or earlier, or UseTraditionalTransformer"></option>
+            <option value="traditional"
+              ><__trans phrase="r4606/6.5 or earlier, or
+              UseTraditionalTransformer"></option
+            >
             <option value="r4607"><__trans phrase="r4607/6.6"></option>
             <option value="r4608"><__trans phrase="r4608/6.6.2"></option>
           </select>
@@ -122,9 +134,14 @@
 
         <div class="col-6">
           <select id="right" class="form-control">
-            <option value="traditional"><__trans phrase="r4606/6.5 or earlier, or UseTraditionalTransformer"></option>
+            <option value="traditional"
+              ><__trans phrase="r4606/6.5 or earlier, or
+              UseTraditionalTransformer"></option
+            >
             <option value="r4607"><__trans phrase="r4607/6.6"></option>
-            <option value="r4608" selected><__trans phrase="r4608/6.6.2"></option>
+            <option value="r4608" selected
+              ><__trans phrase="r4608/6.6.2"></option
+            >
           </select>
         </div>
 

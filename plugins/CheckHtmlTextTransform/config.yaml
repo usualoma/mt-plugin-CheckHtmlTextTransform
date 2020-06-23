@@ -1,6 +1,6 @@
 id: CheckHtmlTextTransform
 name: CheckHtmlTextTransform
-version: 1.0.2
+version: 1.0.4
 
 description: <__trans phrase="This plugin enables you to check html_text_transform compatibility.">
 author_name: Taku Amano
@@ -23,3 +23,5 @@ applications:
         handler: $CheckHtmlTextTransform::MT::Plugin::CheckHtmlTextTransform::checkhtmltexttransform
       checkhtmltexttransform_transform:
         handler: $CheckHtmlTextTransform::MT::Plugin::CheckHtmlTextTransform::checkhtmltexttransform_transform
+      checkhtmltexttransform_transform_cd:
+        handler: $CheckHtmlTextTransform::MT::Plugin::CheckHtmlTextTransform::checkhtmltexttransform_transform_cd
