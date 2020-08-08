@@ -102,7 +102,7 @@ sub html_text_transform_r4608 {
     $str;
 }
 
-sub html_text_transform_r4610 {
+sub html_text_transform_r4609 {
     my $str = shift;
     $str = '' unless defined $str;
     my $tags = qr!(?:h1|h2|h3|h4|h5|h6|table|ol|dl|ul|li|menu|dir|p|pre|center|form|fieldset|select|blockquote|address|div|hr|script|style)!;
